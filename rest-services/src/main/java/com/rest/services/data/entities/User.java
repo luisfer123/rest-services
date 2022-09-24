@@ -1,28 +1,60 @@
 package com.rest.services.data.entities;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 
+@Entity
+@Table(name="`User`")
 public class User {
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
 	@Size(min = 2, message = "Name must have at leat 2 characters")
+	@Column(name = "`name`")
 	private String name;
 	
 	@Past
+	@Column(name = "`birth_date`")
 	private Date birthDate;
+	
+	@OneToMany(
+			mappedBy = "user",
+			cascade = CascadeType.ALL,
+			orphanRemoval = true)
+	private Set<Post> posts = new HashSet<>();
+	
+	public User() {
+		super();
+	}
 
 	private User(UserBuilder UserBuilder) {
 		this.id = UserBuilder.id;
 		this.name = UserBuilder.name;
 		this.birthDate = UserBuilder.birthDate;
 	}
-
-	private User() {
-		super();
+	
+	public void addPost(Post post) {
+		post.setUser(this);
+		this.posts.add(post);
+	}
+	
+	public void removePost(Post post) {
+		post.setUser(null);
+		this.posts.remove(post);
 	}
 
 	public Integer getId() {
@@ -47,6 +79,14 @@ public class User {
 
 	public void setBirthDate(Date birthDate) {
 		this.birthDate = birthDate;
+	}
+
+	public Set<Post> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(Set<Post> posts) {
+		this.posts = posts;
 	}
 
 	@Override
